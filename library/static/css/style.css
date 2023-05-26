@@ -1,0 +1,30 @@
+body{
+    background: #FFFAFA;
+}
+
+*{
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    box-sizing: border-box;
+}
+header{
+    background: #2C4A52;
+    height: 200px;
+	display: table;
+	width: 100%;
+
+
+}
+.logo{
+	display: table-cell;
+	vertical-align: middle;
+}
+h1{
+	text-align: center;
+	color: #FFFAFA;
+}
+nav{
+    background: #537072;
+    height: 45px;
+}
