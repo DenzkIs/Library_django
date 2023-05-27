@@ -1,4 +1,12 @@
 {% extends 'base.html' %}
 {% block content %}
 <h1>Вы находитесь на главной странице библиотеки</h1>
+<div class="container">
+    <ul class="main_list">
+        <li><a href="{% url 'new_book_page' %}">Регистрация новой книги</a></li>
+        <li><a href="{% url 'new_reader_page' %}">Регистрация нового читателя</a></li>
+        <li><a href="{% url 'lend_book_page' %}">Выдача книг</a></li>
+        <li><a href="{% url 'return_book_page' %}">Возврат книг</a></li>
+    </ul>
+</div>
 {% endblock %}

@@ -13,6 +13,9 @@ header{
     height: 200px;
 	display: table;
 	width: 100%;
+/*	background: url("<ваше изображение>") no-repeat;
+    background-size: contain;
+    background-position: center;*/
 
 
 }
@@ -28,3 +31,9 @@ nav{
     background: #537072;
     height: 45px;
 }
+.container{
+    width: 80%;
+    margin: 30px auto 20px;
+
+}
+
