@@ -15,7 +15,14 @@
         </header>
     </a>
     <nav>
-        <h5>Здесь будем навигация</h5>
+        <div class="into_nav">
+            <ul>
+                <li><a href="{% url 'book_list_page' %}">Список книг</a></li>
+                <li><a href="">Список читателей</a></li>
+                <li><a href="">Списание книг</a></li>
+                <li><a href="">Доходность библиотеки</a></li>
+            </ul>
+        </div>
     </nav>
     {% block content %}{% endblock %}
     </body>

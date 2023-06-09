@@ -13,11 +13,6 @@ header{
     height: 200px;
 	display: table;
 	width: 100%;
-/*	background: url("<ваше изображение>") no-repeat;
-    background-size: contain;
-    background-position: center;*/
-
-
 }
 .logo{
 	display: table-cell;
@@ -30,6 +25,12 @@ h1{
 nav{
     background: #537072;
     height: 45px;
+
+.into_nav{
+    width: 80%;
+    text-align: center;
+}
+
 }
 .container{
     width: 80%;
@@ -37,3 +38,15 @@ nav{
 
 }
 
+nav ul{
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    margin: 0;
+    padding: 0;
+}
+li{
+    display: flex;
+    margin-top: 8px;
+    list-style: none;
+}

@@ -1,0 +1,8 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Список всех книг</h2>
+Тестовый вывод количества свободных экземпляров книг
+{% for book in books %}
+    {{ book.title_rus }} количество книг в доступе: {{ book.quantity_free }} шт.<br>
+{% endfor %}
+{% endblock %}

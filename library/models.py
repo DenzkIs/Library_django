@@ -1,3 +1,5 @@
+from django.utils import timezone
+
 from django.db import models
 
 
@@ -20,23 +22,42 @@ class Genre(models.Model):
 class Book(models.Model):
     title_rus = models.CharField(max_length=255, verbose_name='Russian title')
     title_original = models.CharField(max_length=255, verbose_name='Original title', blank=True)
-    genre = models.ManyToManyField(Genre)
+    id_genre = models.ManyToManyField(Genre)
     cost = models.DecimalField(default=0, max_digits=5, decimal_places=2, verbose_name='Cost (BYN)')
     quantity = models.IntegerField(default=0, verbose_name='Number of books')
-    author = models.ManyToManyField(Author)
+    id_author = models.ManyToManyField(Author)
     rent_day = models.DecimalField(max_digits=5, decimal_places=2, verbose_name='Rental per day (BYN)')
-    year = models.IntegerField(blank=True, verbose_name='The year of published')
-    date_reg = models.DateTimeField(auto_now_add=True, verbose_name='Date of registration')
-    page = models.IntegerField(blank=True, verbose_name='Number of pages')
+    year = models.IntegerField(blank=True, default=0, verbose_name='The year of published')
+    date_reg = models.DateTimeField(default=timezone.now, verbose_name='Date of registration')
+    page = models.IntegerField(blank=True, default=0, verbose_name='Number of pages')
 
     def __str__(self):
         return f'{self.id}: {self.title_rus}'
 
 
-class BookCover(models.Model):
-    book = models.ForeignKey(Book, on_delete=models.CASCADE)
-    foto = models.ImageField(upload_to='images/covers', verbose_name="Cover's foto",
-                             default='images/covers/cover_default.jpg')
+    @property
+    def quantity_free(self):
+        return self.bookinstance_set.filter(status='f').count()
+
+
+
+# class BookCover(models.Model):
+#     id_book = models.ForeignKey(Book, on_delete=models.CASCADE)
+#     foto = models.ImageField(upload_to='images/covers', verbose_name="Cover's foto",
+#                              default='images/covers/cover_default.jpg')
+#
+#     def __str__(self):
+#         return 'Cover for book'
+
+class BookInstance(models.Model):
+
+    STATUS_CHOICES = (
+        ('f', 'Free'),
+        ('r', 'Rented'),
+        ('m', 'Maintenance'),
+    )
+    id_book = models.ForeignKey(Book, on_delete=models.CASCADE)
+    status = models.CharField(max_length=1, choices=STATUS_CHOICES, default='f')
 
     def __str__(self):
-        return 'Cover for book'
+        return f'{self.id}: {self.id_book.title_rus} - {self.get_status_display()}'

@@ -1,4 +1,9 @@
+
+
 from django.shortcuts import render
+from django.views.generic import ListView
+
+from .models import Book
 
 
 def get_main_page(request):
@@ -19,3 +24,18 @@ def get_lend_book(request):
 
 def get_return_book(request):
     return render(request, 'return_book.html')
+
+
+class BooksListView(ListView):
+    model = Book
+    template_name = 'list_books.html'
+    context_object_name = 'books'
+    # paginate_by = 3
+    ordering = ['title_rus']
+
+
+
+    # def get_context_data(self, **kwargs):
+    #     context = super(BooksListView, self).get_context_data(**kwargs)
+    #     return context
+    # book.bookinstance_set.filter(status='f').count()
