@@ -39,6 +39,14 @@ class Book(models.Model):
     def quantity_free(self):
         return self.bookinstance_set.filter(status='f').count()
 
+    @property
+    def book_genres(self):
+        list_genres = []
+        for genre in self.id_genre.all():
+            list_genres.append(genre.name)
+        str_genres = ', '.join(list_genres)
+        return str_genres.lower()
+
 
 
 # class BookCover(models.Model):
@@ -61,3 +69,17 @@ class BookInstance(models.Model):
 
     def __str__(self):
         return f'{self.id}: {self.id_book.title_rus} - {self.get_status_display()}'
+
+
+class Reader(models.Model):
+    surname = models.CharField(max_length=100)
+    first_name = models.CharField(max_length=100)
+    patronymic = models.CharField(max_length=100, blank=True, default='')
+    passport_number = models.CharField(max_length=9, blank=True, default='', unique=True)
+    birthday = models.CharField(max_length=10)
+    email = models.EmailField(unique=True)
+    # сделать ввод адреса подробнее!
+    address = models.CharField(max_length=255, blank=True, default='')
+
+    def __str__(self):
+        return f'{self.surname} {self.first_name} {self.birthday}'

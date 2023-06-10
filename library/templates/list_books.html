@@ -1,8 +1,25 @@
 {% extends 'base.html' %}
 {% block content %}
 <h2>Список всех книг</h2>
-Тестовый вывод количества свободных экземпляров книг
-{% for book in books %}
-    {{ book.title_rus }} количество книг в доступе: {{ book.quantity_free }} шт.<br>
-{% endfor %}
+<table class="table-books">
+	<tbody>
+		<tr>
+            <th>Название книги</th>
+            <th>Жанр</th>
+            <th>Год выпуска</th>
+            <th>Всего (шт.)</th>
+            <th>Доступно (шт.)</th>
+		</tr>
+		{% for book in books %}
+			<tr>
+				<td>{{ book.title_rus }}</td>
+				<td>{{ book.book_genres }}</td>
+				<td>{{ book.year }}</td>
+				<td>{{ book.quantity }}</td>
+				<td>{{ book.quantity_free }}</td>
+			</tr>
+		{% endfor %}
+	</tbody>
+</table>
+
 {% endblock %}
