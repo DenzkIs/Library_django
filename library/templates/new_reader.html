@@ -1,4 +1,14 @@
 {% extends 'base.html' %}
 {% block content %}
-<h2>Страница регистрации нового читателя</h2>
+<div class="new-reader">
+    <h2>Страница регистрации нового читателя</h2>
+    <form action="" method="POST">
+        {% csrf_token %}
+        {% for f in form %}
+            {{ f.label }}: {{ f }}
+            <span style="color: red">{{ f.errors }}</span>
+        {% endfor %}
+        <button type="submit">OK</button>
+    </form>
+</div>
 {% endblock %}

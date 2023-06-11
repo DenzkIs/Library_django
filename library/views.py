@@ -1,8 +1,7 @@
-
-
 from django.shortcuts import render
 from django.views.generic import ListView
-
+from django.views import View
+from .forms import ReaderForm
 from .models import Book
 
 
@@ -15,7 +14,14 @@ def get_new_book(request):
 
 
 def get_new_reader(request):
-    return render(request, 'new_reader.html')
+    if request.method == 'POST':
+        form = ReaderForm(request.POST)
+        if form.is_valid():
+            form.save()
+            form = ReaderForm()
+    else:
+        form = ReaderForm()
+    return render(request, 'new_reader.html', context={'form': form})
 
 
 def get_lend_book(request):
@@ -39,3 +45,5 @@ class BooksListView(ListView):
     #     context = super(BooksListView, self).get_context_data(**kwargs)
     #     return context
     # book.bookinstance_set.filter(status='f').count()
+
+

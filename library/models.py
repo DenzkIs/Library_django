@@ -1,5 +1,4 @@
 from django.utils import timezone
-
 from django.db import models
 
 
@@ -67,6 +66,7 @@ class BookInstance(models.Model):
     id_book = models.ForeignKey(Book, on_delete=models.CASCADE)
     status = models.CharField(max_length=1, choices=STATUS_CHOICES, default='f')
 
+
     def __str__(self):
         return f'{self.id}: {self.id_book.title_rus} - {self.get_status_display()}'
 
@@ -75,7 +75,7 @@ class Reader(models.Model):
     surname = models.CharField(max_length=100)
     first_name = models.CharField(max_length=100)
     patronymic = models.CharField(max_length=100, blank=True, default='')
-    passport_number = models.CharField(max_length=9, blank=True, default='', unique=True)
+    passport_number = models.CharField(max_length=9, null=True, blank=True, unique=True)
     birthday = models.CharField(max_length=10)
     email = models.EmailField(unique=True)
     # сделать ввод адреса подробнее!
@@ -83,3 +83,16 @@ class Reader(models.Model):
 
     def __str__(self):
         return f'{self.surname} {self.first_name} {self.birthday}'
+
+
+class Cart(models.Model):
+    id_reader = models.ForeignKey(Reader, on_delete=models.CASCADE)
+    id_book_instance = models.ManyToManyField(BookInstance)
+
+    def __str__(self):
+        return f'{self.id}: Книги в заказе {self.id_reader}'
+
+
+class Order(models.Model):
+    id_cart = models.ForeignKey(Cart, on_delete=models.CASCADE)
+    # будет дополнено
