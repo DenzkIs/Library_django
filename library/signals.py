@@ -7,7 +7,7 @@ from .models import Book, BookInstance
 def create_book_instance(sender, instance, created, **kwargs):
     if created:
         for i in range(instance.quantity):
-            BookInstance.objects.create(id_book=instance)
+            BookInstance.objects.create(book=instance)
             print('Создан экземпляр')
             print(instance)
             print(sender)

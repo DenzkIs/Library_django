@@ -6,4 +6,5 @@ admin.site.register(Genre)
 admin.site.register(Book)
 admin.site.register(BookInstance)
 admin.site.register(Reader)
+admin.site.register(Order)
 

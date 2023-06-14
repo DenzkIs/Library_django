@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Список всех читателей</h2>
+<table class="table-books">
+	<tbody>
+		<tr>
+            <th>Фамилия</th>
+            <th>Имя</th>
+            <th>Дата рождения</th>
+            <th>Адрес</th>
+            <th>E-mail</th>
+		</tr>
+		{% for reader in readers %}
+			<tr>
+				<td>{{ reader.surname }}</td>
+				<td>{{ reader.first_name }}</td>
+				<td>{{ reader.birthday }}</td>
+				<td>{{ reader.address }}</td>
+				<td>{{ reader.email }}</td>
+			</tr>
+		{% endfor %}
+	</tbody>
+</table>
+
+{% endblock %}

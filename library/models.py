@@ -1,10 +1,11 @@
 from django.utils import timezone
 from django.db import models
+import datetime
 
 
 class Author(models.Model):
-    name = models.CharField(max_length=100, verbose_name='Author name')
-    foto = models.ImageField(upload_to='images/authors', verbose_name="Author's foto",
+    name = models.CharField(max_length=255, verbose_name='ФИО автора')
+    foto = models.ImageField(upload_to='images/authors', verbose_name="Фото автора",
                              default='images/authors/author_default.png')
 
     def __str__(self):
@@ -12,27 +13,26 @@ class Author(models.Model):
 
 
 class Genre(models.Model):
-    name = models.CharField(max_length=100, verbose_name='Genre name')
+    name = models.CharField(max_length=100, verbose_name='Жанр')
 
     def __str__(self):
         return self.name
 
 
 class Book(models.Model):
-    title_rus = models.CharField(max_length=255, verbose_name='Russian title')
-    title_original = models.CharField(max_length=255, verbose_name='Original title', blank=True)
-    id_genre = models.ManyToManyField(Genre)
-    cost = models.DecimalField(default=0, max_digits=5, decimal_places=2, verbose_name='Cost (BYN)')
-    quantity = models.IntegerField(default=0, verbose_name='Number of books')
-    id_author = models.ManyToManyField(Author)
-    rent_day = models.DecimalField(max_digits=5, decimal_places=2, verbose_name='Rental per day (BYN)')
-    year = models.IntegerField(blank=True, default=0, verbose_name='The year of published')
-    date_reg = models.DateTimeField(default=timezone.now, verbose_name='Date of registration')
-    page = models.IntegerField(blank=True, default=0, verbose_name='Number of pages')
+    title_rus = models.CharField(max_length=255, verbose_name='Русское наименование')
+    title_original = models.CharField(max_length=255, verbose_name='Оригинальное наименование', blank=True)
+    genres = models.ManyToManyField(Genre, verbose_name='Жанры')
+    cost = models.DecimalField(default=0, max_digits=5, decimal_places=2, verbose_name='Стоимость книги(BYN)')
+    quantity = models.IntegerField(default=0, verbose_name='Количество книг')
+    authors = models.ManyToManyField(Author, verbose_name='Авторы')
+    rent_day = models.DecimalField(max_digits=5, decimal_places=2, verbose_name='Стоимость аренды (BYN)')
+    year = models.IntegerField(blank=True, default=0, verbose_name='Год издания')
+    date_reg = models.DateTimeField(default=timezone.now, verbose_name='Дата регистрации')
+    pages = models.IntegerField(blank=True, default=0, verbose_name='Количество страниц')
 
     def __str__(self):
         return f'{self.id}: {self.title_rus}'
-
 
     @property
     def quantity_free(self):
@@ -41,34 +41,25 @@ class Book(models.Model):
     @property
     def book_genres(self):
         list_genres = []
-        for genre in self.id_genre.all():
+        for genre in self.genres.all():
             list_genres.append(genre.name)
         str_genres = ', '.join(list_genres)
         return str_genres.lower()
 
 
-
-# class BookCover(models.Model):
-#     id_book = models.ForeignKey(Book, on_delete=models.CASCADE)
-#     foto = models.ImageField(upload_to='images/covers', verbose_name="Cover's foto",
-#                              default='images/covers/cover_default.jpg')
-#
-#     def __str__(self):
-#         return 'Cover for book'
-
 class BookInstance(models.Model):
-
     STATUS_CHOICES = (
-        ('f', 'Free'),
-        ('r', 'Rented'),
-        ('m', 'Maintenance'),
+        ('f', 'Свободная'),
+        ('r', 'В аренде'),
+        ('m', 'На обслуживании'),
     )
-    id_book = models.ForeignKey(Book, on_delete=models.CASCADE)
+    book = models.ForeignKey(Book, on_delete=models.CASCADE)
     status = models.CharField(max_length=1, choices=STATUS_CHOICES, default='f')
-
+    cover_foto = models.ImageField(upload_to='images/covers', verbose_name="Фото обложки",
+                                   default='images/covers/cover_default.jpg')
 
     def __str__(self):
-        return f'{self.id}: {self.id_book.title_rus} - {self.get_status_display()}'
+        return f'{self.id}: {self.book.title_rus} - {self.get_status_display()}'
 
 
 class Reader(models.Model):
@@ -78,21 +69,29 @@ class Reader(models.Model):
     passport_number = models.CharField(max_length=9, null=True, blank=True, unique=True)
     birthday = models.CharField(max_length=10)
     email = models.EmailField(unique=True)
-    # сделать ввод адреса подробнее!
     address = models.CharField(max_length=255, blank=True, default='')
 
     def __str__(self):
         return f'{self.surname} {self.first_name} {self.birthday}'
 
 
-class Cart(models.Model):
-    id_reader = models.ForeignKey(Reader, on_delete=models.CASCADE)
-    id_book_instance = models.ManyToManyField(BookInstance)
+class Order(models.Model):
+    STATUS_CHOICES = (
+        ('finished', 'Окончен'),
+        ('delayed', 'Задерживается'),
+        ('active', 'Активный'),
+    )
+    reader = models.ForeignKey('Reader', on_delete=models.CASCADE, verbose_name='Читатель', null=True)
+    book_instance = models.ManyToManyField('BookInstance', verbose_name='Экземпляр книги')
+    order_time = models.DateTimeField(default=timezone.now, verbose_name='Время заказа')
+    return_date = models.DateTimeField(verbose_name='Дата возврата', default=datetime.datetime.now() + datetime.timedelta(days=30))
+    order_status = models.CharField(max_length=8, default='active', choices=STATUS_CHOICES, verbose_name='Статус заказа')
+    penalty_for_delay = models.DecimalField(max_digits=6, decimal_places=2, default=0, verbose_name='Пеня за задержку')
+    damage_penalty = models.DecimalField(max_digits=6, decimal_places=2, default=0, verbose_name='Штраф за повреждения')
 
     def __str__(self):
-        return f'{self.id}: Книги в заказе {self.id_reader}'
+        return f'Заказ №{self.id} - {self.reader} - {self.get_order_status_display()}'
 
-
-class Order(models.Model):
-    id_cart = models.ForeignKey(Cart, on_delete=models.CASCADE)
-    # будет дополнено
+    # def save(self, *args, **kwargs):
+    #     self.return_date = self.order_time + datetime.timedelta(days=30)
+    #     super().save(*args, **kwargs)

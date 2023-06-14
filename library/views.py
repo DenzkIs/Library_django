@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.views.generic import ListView
 from django.views import View
 from .forms import ReaderForm
-from .models import Book
+from .models import Book, Reader
 
 
 def get_main_page(request):
@@ -39,11 +39,15 @@ class BooksListView(ListView):
     # paginate_by = 3
     ordering = ['title_rus']
 
-
-
     # def get_context_data(self, **kwargs):
     #     context = super(BooksListView, self).get_context_data(**kwargs)
     #     return context
     # book.bookinstance_set.filter(status='f').count()
 
 
+class ReadersListView(ListView):
+    model = Reader
+    template_name = 'list_readers.html'
+    context_object_name = 'readers'
+    # paginate_by = 3
+    ordering = ['surname']
