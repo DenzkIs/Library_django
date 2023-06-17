@@ -1,6 +1,13 @@
 {% extends 'base.html' %}
 {% block content %}
 <h2>Список всех книг</h2>
+
+<div style="width: 80%; margin: auto">
+	<form action="">
+		<input style="width: 500px" type="text" name="author_name">
+		<button style="width: 40px">Поиск</button>
+	</form>
+</div>
 <table class="table-books">
 	<tbody>
 		<tr>
@@ -18,6 +25,15 @@
 				<td>{{ book.quantity }}</td>
 				<td>{{ book.quantity_free }}</td>
 			</tr>
+		{% empty %}
+		<tr>
+			<td><h3 style="color: blue">По вашему запросу ничего не найдено</h3></td>
+			<td>-</td>
+			<td>-</td>
+			<td>-</td>
+			<td>-</td>
+		</tr>
+
 		{% endfor %}
 	</tbody>
 </table>

@@ -10,5 +10,7 @@ urlpatterns = [
     path('return_book/', get_return_book, name='return_book_page'),
     path('books_list/', BooksListView.as_view(), name='books_list_page'),
     path('readers_list/', ReadersListView.as_view(), name='readers_list_page'),
+    path('new_genre/', get_new_genre, name='new_genre_page'),
+    path('new_author/', get_new_author, name='new_author_page'),
 
 ]

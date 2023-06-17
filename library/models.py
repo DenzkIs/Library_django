@@ -23,7 +23,7 @@ class Book(models.Model):
     title_rus = models.CharField(max_length=255, verbose_name='Русское наименование')
     title_original = models.CharField(max_length=255, verbose_name='Оригинальное наименование', blank=True)
     genres = models.ManyToManyField(Genre, verbose_name='Жанры')
-    cost = models.DecimalField(default=0, max_digits=5, decimal_places=2, verbose_name='Стоимость книги(BYN)')
+    cost = models.DecimalField(default=0, max_digits=5, decimal_places=2, verbose_name='Стоимость книги (BYN)')
     quantity = models.IntegerField(default=0, verbose_name='Количество книг')
     authors = models.ManyToManyField(Author, verbose_name='Авторы')
     rent_day = models.DecimalField(max_digits=5, decimal_places=2, verbose_name='Стоимость аренды (BYN)')
@@ -84,8 +84,10 @@ class Order(models.Model):
     reader = models.ForeignKey('Reader', on_delete=models.CASCADE, verbose_name='Читатель', null=True)
     book_instance = models.ManyToManyField('BookInstance', verbose_name='Экземпляр книги')
     order_time = models.DateTimeField(default=timezone.now, verbose_name='Время заказа')
-    return_date = models.DateTimeField(verbose_name='Дата возврата', default=datetime.datetime.now() + datetime.timedelta(days=30))
-    order_status = models.CharField(max_length=8, default='active', choices=STATUS_CHOICES, verbose_name='Статус заказа')
+    return_date = models.DateTimeField(verbose_name='Дата возврата',
+                                       default=datetime.datetime.now() + datetime.timedelta(days=30))
+    order_status = models.CharField(max_length=8, default='active', choices=STATUS_CHOICES,
+                                    verbose_name='Статус заказа')
     penalty_for_delay = models.DecimalField(max_digits=6, decimal_places=2, default=0, verbose_name='Пеня за задержку')
     damage_penalty = models.DecimalField(max_digits=6, decimal_places=2, default=0, verbose_name='Штраф за повреждения')
 

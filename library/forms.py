@@ -1,9 +1,32 @@
 from django import forms
-from .models import Reader
+from django.forms import Textarea, TextInput
+
+from .models import Reader, Book, Genre, Author
 
 
 class ReaderForm(forms.ModelForm):
-
     class Meta:
         model = Reader
+        fields = '__all__'
+
+
+class BookForm(forms.ModelForm):
+    class Meta:
+        model = Book
+        fields = '__all__'
+        localized_fields = ('date_reg',)
+        widgets = {
+            'title_rus': TextInput(attrs={}),
+        }
+
+
+class GenreForm(forms.ModelForm):
+    class Meta:
+        model = Genre
+        fields = '__all__'
+
+
+class AuthorForm(forms.ModelForm):
+    class Meta:
+        model = Author
         fields = '__all__'
