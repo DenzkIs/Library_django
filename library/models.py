@@ -1,6 +1,7 @@
 from django.utils import timezone
 from django.db import models
 import datetime
+import random
 
 
 class Author(models.Model):
@@ -82,7 +83,7 @@ class Order(models.Model):
         ('active', 'Активный'),
     )
     reader = models.ForeignKey('Reader', on_delete=models.CASCADE, verbose_name='Читатель', null=True)
-    book_instance = models.ManyToManyField('BookInstance', verbose_name='Экземпляр книги')
+    book_instance = models.ManyToManyField('BookInstance', verbose_name='Экземпляр книги', null=True)
     order_time = models.DateTimeField(default=timezone.now, verbose_name='Время заказа')
     return_date = models.DateTimeField(verbose_name='Дата возврата',
                                        default=datetime.datetime.now() + datetime.timedelta(days=30))

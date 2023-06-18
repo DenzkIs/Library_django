@@ -1,7 +1,7 @@
 from django import forms
 from django.forms import Textarea, TextInput
 
-from .models import Reader, Book, Genre, Author
+from .models import Reader, Book, Genre, Author, Order
 
 
 class ReaderForm(forms.ModelForm):
@@ -29,4 +29,10 @@ class GenreForm(forms.ModelForm):
 class AuthorForm(forms.ModelForm):
     class Meta:
         model = Author
+        fields = '__all__'
+
+
+class OrderForm(forms.ModelForm):
+    class Meta:
+        model = Order
         fields = '__all__'

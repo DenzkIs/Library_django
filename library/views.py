@@ -1,8 +1,8 @@
-from django.shortcuts import render
-from django.views.generic import ListView
+from django.shortcuts import render, redirect
+from django.views.generic import ListView, DetailView
 from django.views import View
-from .forms import ReaderForm, BookForm, AuthorForm, GenreForm
-from .models import Book, Reader
+from .forms import ReaderForm, BookForm, AuthorForm, GenreForm, OrderForm
+from .models import Book, Reader, Order
 
 
 # class SearchBookView(ListView):
@@ -46,6 +46,8 @@ def get_new_book(request):
 def get_new_genre(request):
     if request.method == 'POST':
         form = GenreForm(request.POST)
+        print(request.POST)
+        print(form)
         if form.is_valid():
             form.save()
             form = GenreForm()
@@ -65,12 +67,35 @@ def get_new_author(request):
     return render(request, 'new_author.html', context={'form': form})
 
 
+def get_new_order(request, *args, **kwargs):
+    if request.method == 'POST':
+        form = OrderForm(request.POST)
+        if form.is_valid():
+            form.save()
+            form = OrderForm()
+    else:
+        form = OrderForm()
+    return render(request, 'new_order.html', context={'form': form})
+
+
+def create_test_order(request, **kwargs):
+    reader = kwargs.get('pk')
+    Order.objects.create(reader_id=reader)
+    return redirect('books_list_page')
+
+
 def get_lend_book(request):
     return render(request, 'lend_book.html')
 
 
 def get_return_book(request):
     return render(request, 'return_book.html')
+
+
+class ReaderDetailView(DetailView):
+    model = Reader
+    template_name = 'reader.html'
+    context_object_name = 'reader'
 
 
 class BooksListView(ListView):
@@ -98,3 +123,9 @@ class ReadersListView(ListView):
     context_object_name = 'readers'
     # paginate_by = 3
     ordering = ['surname']
+
+    def get_queryset(self):
+        reader_name = self.request.GET.get('reader_name')
+        if reader_name == '' or reader_name is None:
+            return super().get_queryset()
+        return Reader.objects.filter(surname__icontains=reader_name)

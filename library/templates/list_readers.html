@@ -1,6 +1,12 @@
 {% extends 'base.html' %}
 {% block content %}
 <h2>Список всех читателей</h2>
+<div style="width: 80%; margin: auto; text-align: center;">
+	<form action="">
+		<input style="width: 500px" type="text" name="reader_name">
+		<button style="width: auto">Поиск</button>
+	</form>
+</div>
 <table class="table-books">
 	<tbody>
 		<tr>
@@ -11,13 +17,17 @@
             <th>E-mail</th>
 		</tr>
 		{% for reader in readers %}
-			<tr>
-				<td>{{ reader.surname }}</td>
+
+			<tr class="select-tr">
+
+				<td><a href="{% url 'reader_detail' reader.pk %}"><div>{{ reader.surname }}</div></a></td>
 				<td>{{ reader.first_name }}</td>
 				<td>{{ reader.birthday }}</td>
 				<td>{{ reader.address }}</td>
 				<td>{{ reader.email }}</td>
+
 			</tr>
+
 		{% endfor %}
 	</tbody>
 </table>

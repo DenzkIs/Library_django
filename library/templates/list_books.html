@@ -2,10 +2,10 @@
 {% block content %}
 <h2>Список всех книг</h2>
 
-<div style="width: 80%; margin: auto">
+<div style="width: 80%; margin: auto; text-align: center;">
 	<form action="">
 		<input style="width: 500px" type="text" name="author_name">
-		<button style="width: 40px">Поиск</button>
+		<button style="width: auto">Поиск</button>
 	</form>
 </div>
 <table class="table-books">
@@ -18,12 +18,17 @@
             <th>Доступно (шт.)</th>
 		</tr>
 		{% for book in books %}
-			<tr>
+			<tr class="select-tr">
 				<td>{{ book.title_rus }}</td>
 				<td>{{ book.book_genres }}</td>
 				<td>{{ book.year }}</td>
 				<td>{{ book.quantity }}</td>
+				{% if book.quantity_free == 1 %}
+				<td style="background: #fac0c9">{{ book.quantity_free }}</td>
+				{% else %}
 				<td>{{ book.quantity_free }}</td>
+				{% endif %}
+
 			</tr>
 		{% empty %}
 		<tr>
