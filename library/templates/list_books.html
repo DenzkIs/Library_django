@@ -8,6 +8,7 @@
 		<button style="width: auto">Поиск</button>
 	</form>
 </div>
+{% if books %}
 <table class="table-books">
 	<tbody>
 		<tr>
@@ -28,15 +29,13 @@
 				{% else %}
 				<td>{{ book.quantity_free }}</td>
 				{% endif %}
-
 			</tr>
-		{% empty %}
-		<tr>
-			<td><h3 style="color: blue">По вашему запросу ничего не найдено</h3></td>
-		</tr>
-
 		{% endfor %}
 	</tbody>
 </table>
-
+{% else %}
+	<div class="empty-list">
+		<h3 style="color: blue">По вашему запросу ничего не найдено</h3>
+	</div>
+{% endif %}
 {% endblock %}

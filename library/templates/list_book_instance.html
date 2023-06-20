@@ -15,8 +15,10 @@
 				<td style="background: #fac0c9">{{ instance.get_status_display }}</td>
 			{% elif instance.status == 'm' %}
 				<td style="background: #bfe7f5">{{ instance.get_status_display }}</td>
-			{% else %}
+			{% elif cdi != 0  %}
 				<td><a href="{% url 'get_add_to_order' instance.id %}">{{ instance.get_status_display }}</a></td>
+			{% else %}
+				<td><a href="{% url 'readers_list_page' %}">{{ instance.get_status_display }}</a></td>
 			{% endif %}
 		</tr>
 		{% endfor %}

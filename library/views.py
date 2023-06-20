@@ -78,10 +78,10 @@ def get_new_order(request, *args, **kwargs):
     return render(request, 'new_order.html', context={'form': form})
 
 
-def create_test_order(request, **kwargs):
-    reader = kwargs.get('pk')
-    Order.objects.create(reader_id=reader)
-    return redirect('books_list_page')
+# def create_test_order(request, **kwargs):
+#     reader = kwargs.get('pk')
+#     Order.objects.create(reader_id=reader)
+#     return redirect('books_list_page')
 
 
 def get_lend_book(request):
@@ -120,13 +120,7 @@ class BooksListView(ListView):
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
-        # context['reader'] = Reader.objects.get
         return context
-
-    # def get_context_data(self, **kwargs):
-    #     context = super(BooksListView, self).get_context_data(**kwargs)
-    #     return context
-    # book.bookinstance_set.filter(status='f').count()
 
 
 class ReadersListView(ListView):
@@ -144,7 +138,11 @@ class ReadersListView(ListView):
 
 
 def list_books_with_id(request):
-    books = Book.objects.all()
+    # дополнить
+    if save_reader_id['cdi'] == 0:
+        books = Book.objects.all()
+    else:
+        books = Book.objects.all()
     context = {'books': books}
     return render(request, 'list_books.html', context=context)
 
@@ -171,4 +169,9 @@ def get_list_book_instance(request, id):
 
 def get_add_to_order(request, id):
     book_instance = BookInstance.objects.get(id=id)
-    return redirect('main_page')
+    order, created = Order.objects.get_or_create(reader=Reader.objects.get(id=save_reader_id['cdi']), order_status='active')
+    order.book_instance.add(book_instance)
+    book_instance.status = 'r'
+    book_instance.save()
+    order.save()
+    return redirect('list_books_with_id')
