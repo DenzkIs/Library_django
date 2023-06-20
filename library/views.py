@@ -1,8 +1,10 @@
+from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.views.generic import ListView, DetailView
 from django.views import View
 from .forms import ReaderForm, BookForm, AuthorForm, GenreForm, OrderForm
-from .models import Book, Reader, Order
+from .models import Book, Reader, Order, BookInstance
+from .utils import save_reader_id
 
 
 # class SearchBookView(ListView):
@@ -46,8 +48,6 @@ def get_new_book(request):
 def get_new_genre(request):
     if request.method == 'POST':
         form = GenreForm(request.POST)
-        print(request.POST)
-        print(form)
         if form.is_valid():
             form.save()
             form = GenreForm()
@@ -92,11 +92,18 @@ def get_return_book(request):
     return render(request, 'return_book.html')
 
 
-class ReaderDetailView(DetailView):
-    model = Reader
-    template_name = 'reader.html'
-    context_object_name = 'reader'
+# class ReaderDetailView(DetailView):
+#     model = Reader
+#     template_name = 'reader.html'
+#     context_object_name = 'reader'
 
+
+def get_reader(request, id):
+    reader = Reader.objects.get(id=id)
+    context = {'reader': reader}
+    save_reader_id['cdi'] = id
+    save_reader_id['name'] = f'{reader.surname} {reader.first_name}'
+    return render(request, 'reader.html', context)
 
 class BooksListView(ListView):
     model = Book
@@ -110,6 +117,11 @@ class BooksListView(ListView):
         if author_name == '' or author_name is None:
             return super().get_queryset()
         return Book.objects.filter(title_rus__icontains=author_name)
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # context['reader'] = Reader.objects.get
+        return context
 
     # def get_context_data(self, **kwargs):
     #     context = super(BooksListView, self).get_context_data(**kwargs)
@@ -129,3 +141,34 @@ class ReadersListView(ListView):
         if reader_name == '' or reader_name is None:
             return super().get_queryset()
         return Reader.objects.filter(surname__icontains=reader_name)
+
+
+def list_books_with_id(request):
+    books = Book.objects.all()
+    context = {'books': books}
+    return render(request, 'list_books.html', context=context)
+
+
+def clean_cp(request):
+    """
+    Очистка контекстпроцессора и редирект
+    """
+    save_reader_id['cdi'] = 0
+    save_reader_id['name'] = ''
+    current_address: str = request.META.get('HTTP_REFERER')
+    if current_address[-2].isdigit():  # условие требует уточнений или регулярки
+        # исключаем редирект на страницу этого же читателя
+        return redirect('readers_list_page')
+    return HttpResponseRedirect(current_address)
+
+
+def get_list_book_instance(request, id):
+    book = Book.objects.get(id=id)
+    instances = book.bookinstance_set.all()
+    context = {'book': book, 'instances': instances}
+    return render(request, 'list_book_instance.html', context)
+
+
+def get_add_to_order(request, id):
+    book_instance = BookInstance.objects.get(id=id)
+    return redirect('main_page')

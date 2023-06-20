@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Список всех экземпляров {{ book.title_rus }}</h2>
+
+<table class="table-books">
+	<tbody>
+		<tr>
+            <th>Уникальный номер</th>
+            <th>Текущий статус</th>
+		</tr>
+		{% for instance in instances %}
+		<tr class="select-tr">
+			<td>{{ instance.id }}</td>
+			{% if instance.status == 'r' %}
+				<td style="background: #fac0c9">{{ instance.get_status_display }}</td>
+			{% elif instance.status == 'm' %}
+				<td style="background: #bfe7f5">{{ instance.get_status_display }}</td>
+			{% else %}
+				<td><a href="{% url 'get_add_to_order' instance.id %}">{{ instance.get_status_display }}</a></td>
+			{% endif %}
+		</tr>
+		{% endfor %}
+	</tbody>
+</table>
+{% endblock %}

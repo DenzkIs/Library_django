@@ -19,7 +19,7 @@
 		</tr>
 		{% for book in books %}
 			<tr class="select-tr">
-				<td>{{ book.title_rus }}</td>
+				<td><a href="{% url 'get_list_book_instance' book.id %}">{{ book.title_rus }}</a></td>
 				<td>{{ book.book_genres }}</td>
 				<td>{{ book.year }}</td>
 				<td>{{ book.quantity }}</td>
@@ -33,10 +33,6 @@
 		{% empty %}
 		<tr>
 			<td><h3 style="color: blue">По вашему запросу ничего не найдено</h3></td>
-			<td>-</td>
-			<td>-</td>
-			<td>-</td>
-			<td>-</td>
 		</tr>
 
 		{% endfor %}

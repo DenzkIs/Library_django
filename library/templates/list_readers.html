@@ -17,17 +17,13 @@
             <th>E-mail</th>
 		</tr>
 		{% for reader in readers %}
-
 			<tr class="select-tr">
-
-				<td><a href="{% url 'reader_detail' reader.pk %}"><div>{{ reader.surname }}</div></a></td>
+				<td><a href="{% url 'reader_detail' reader.id %}"><div>{{ reader.surname }}</div></a></td>
 				<td>{{ reader.first_name }}</td>
 				<td>{{ reader.birthday }}</td>
 				<td>{{ reader.address }}</td>
 				<td>{{ reader.email }}</td>
-
 			</tr>
-
 		{% endfor %}
 	</tbody>
 </table>

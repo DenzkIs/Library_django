@@ -31,12 +31,13 @@ h2{
 nav{
     background: #537072;
     height: 45px;
-    margin: 0 auto 10px;
+    margin: 0 auto;
 
 
 .into-nav{
     width: 80%;
     text-align: center;
+    margin: 0 auto;
 
 }
 
@@ -156,4 +157,8 @@ table.table-reader td {
     margin-right: 50px;
     margin-left: 50px;
 
+}
+span.add-274e:after {
+    content: '\274E';
+    width: 0px;
 }
