@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Акт выдачи книг</h2>
+<div style="text-align: center">
+    {{ name }}<br>
+    {% for book in order.book_instance.all %}
+        {{ book.book.title_rus }}<br>
+    {% endfor %}
+</div>
+
+{% endblock %}

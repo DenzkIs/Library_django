@@ -5,7 +5,7 @@ from django.views import View
 from .forms import ReaderForm, BookForm, AuthorForm, GenreForm, OrderForm
 from .models import Book, Reader, Order, BookInstance
 from .utils import save_reader_id
-
+from django.contrib import messages
 
 # class SearchBookView(ListView):
 #     template_name = 'list_books.html'
@@ -168,10 +168,28 @@ def get_list_book_instance(request, id):
 
 
 def get_add_to_order(request, id):
-    book_instance = BookInstance.objects.get(id=id)
+    book_instance_got = BookInstance.objects.get(id=id)
     order, created = Order.objects.get_or_create(reader=Reader.objects.get(id=save_reader_id['cdi']), order_status='active')
-    order.book_instance.add(book_instance)
-    book_instance.status = 'r'
-    book_instance.save()
+    bi_in_order = order.book_instance.all()
+    if bi_in_order.count() == 5:
+        print('В заказе уже 5 книг!')
+        messages.add_message(request, messages.INFO, "В заказе уже 5 книг!")
+        return redirect('list_books_with_id')
+    for b in bi_in_order:
+        if b.book_id == book_instance_got.book_id:
+            print('Другой экземпляр данной книги уже добавлен в заказ.')
+            messages.add_message(request, messages.INFO, "Другой экземпляр данной книги уже добавлен в заказ")
+            return redirect('list_books_with_id')
+    order.book_instance.add(book_instance_got)
+    book_instance_got.status = 'r'
+    book_instance_got.save()
     order.save()
     return redirect('list_books_with_id')
+
+def get_check_order(request):
+    if save_reader_id['cdi'] != 0:
+        order = Order.objects.get(reader=Reader.objects.get(id=save_reader_id['cdi']))
+        context = {'order': order}
+        return render(request, 'check_order.html', context)
+    else:
+        return redirect('main_page')

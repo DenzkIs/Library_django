@@ -23,11 +23,18 @@
                 <li><a class="text-nav" href="">Доходность библиотеки</a></li>
                 <li><a class="text-nav" href="{% url 'admin:index' %}">Админ</a></li>
                 {% if cdi != 0 %}
-                    <li><a class="text-nav" style="color: red" href="">{{ name }}</a><a href="{% url 'clean_cp' %}"><span class="add-274e"></span></a></li>
+                    <li><a class="text-nav" style="color: red" href="{% url 'check_order' %}">{{ name }}</a><a href="{% url 'clean_cp' %}"><span class="add-274e"></span></a></li>
                 {% endif %}
             </ul>
         </div>
     </nav>
+    {% if messages %}
+        {% for message in messages %}
+            <div style="margin: 10px; color: red; font-size: 20px; text-align: center;">
+                {{ message }}<br>
+            </div>
+        {% endfor %}
+    {% endif %}
     {% block content %}{% endblock %}
     </body>
 </html>
