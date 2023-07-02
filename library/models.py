@@ -2,6 +2,7 @@ from django.utils import timezone
 from django.db import models
 import datetime
 import random
+from decimal import Decimal
 
 
 class Author(models.Model):
@@ -25,7 +26,6 @@ class Book(models.Model):
     title_original = models.CharField(max_length=255, verbose_name='Оригинальное наименование', blank=True)
     genres = models.ManyToManyField(Genre, verbose_name='Жанры')
     cost = models.DecimalField(default=0, max_digits=5, decimal_places=2, verbose_name='Стоимость книги (BYN)')
-    quantity = models.IntegerField(default=0, verbose_name='Количество книг')
     authors = models.ManyToManyField(Author, verbose_name='Авторы')
     rent_day = models.DecimalField(max_digits=5, decimal_places=2, verbose_name='Стоимость аренды (BYN)')
     year = models.IntegerField(blank=True, default=0, verbose_name='Год издания')
@@ -40,6 +40,10 @@ class Book(models.Model):
         return self.bookinstance_set.filter(status='f').count()
 
     @property
+    def total_quantity(self):
+        return self.bookinstance_set.count()
+
+    @property
     def book_genres(self):
         list_genres = []
         for genre in self.genres.all():
@@ -52,12 +56,19 @@ class BookInstance(models.Model):
     STATUS_CHOICES = (
         ('f', 'Свободная'),
         ('r', 'В аренде'),
+        ('c', 'Выбрана для заказа'),
         ('m', 'На обслуживании'),
     )
     book = models.ForeignKey(Book, on_delete=models.CASCADE)
     status = models.CharField(max_length=1, choices=STATUS_CHOICES, default='f')
     cover_foto = models.ImageField(upload_to='images/covers', verbose_name="Фото обложки",
                                    default='images/covers/cover_default.jpg')
+    cost_coefficient = models.DecimalField(max_digits=3, decimal_places=2, default=1,
+                                           verbose_name="Коэффицент стоимости")
+
+    @property
+    def cost_with_coefficient(self):
+        return self.cost_coefficient * self.book.rent_day
 
     def __str__(self):
         return f'{self.id}: {self.book.title_rus} - {self.get_status_display()}'
@@ -92,9 +103,26 @@ class Order(models.Model):
     penalty_for_delay = models.DecimalField(max_digits=6, decimal_places=2, default=0, verbose_name='Пеня за задержку')
     damage_penalty = models.DecimalField(max_digits=6, decimal_places=2, default=0, verbose_name='Штраф за повреждения')
 
+    @property
+    def rental_days(self):
+        return round((self.return_date - self.order_time).total_seconds() / 60 / 60 / 24)
+
+    @property
+    def sum_cost(self):
+        total = 0
+        discount = 1
+        quantity = self.book_instance.count()
+        if 2 < quantity < 5:
+            discount = 0.90
+        elif quantity == 5:
+            discount = 0.85
+        for book in self.book_instance.all():
+            total += book.cost_with_coefficient
+        return (total * self.rental_days * Decimal(discount)).quantize(Decimal("1.00"))
+
     def __str__(self):
         return f'Заказ №{self.id} - {self.reader} - {self.get_order_status_display()}'
 
-    # def save(self, *args, **kwargs):
-    #     self.return_date = self.order_time + datetime.timedelta(days=30)
-    #     super().save(*args, **kwargs)
+# def save(self, *args, **kwargs):
+#     self.return_date = self.order_time + datetime.timedelta(days=30)
+#     super().save(*args, **kwargs)

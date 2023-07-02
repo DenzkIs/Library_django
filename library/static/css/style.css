@@ -165,3 +165,7 @@ span.add-274e:after {
 .empty-list{
     text-align: center;
 }
+
+#djDebug .djDebugSql {
+    width: 1000px;
+}

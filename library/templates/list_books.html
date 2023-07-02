@@ -23,7 +23,7 @@
 				<td><a href="{% url 'get_list_book_instance' book.id %}">{{ book.title_rus }}</a></td>
 				<td>{{ book.book_genres }}</td>
 				<td>{{ book.year }}</td>
-				<td>{{ book.quantity }}</td>
+				<td>{{ book.total_quantity }}</td>
 				{% if book.quantity_free == 0 %}
 				<td style="background: #fac0c9">{{ book.quantity_free }}</td>
 				{% else %}

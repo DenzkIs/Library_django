@@ -11,12 +11,15 @@ class ReaderForm(forms.ModelForm):
 
 
 class BookForm(forms.ModelForm):
+    quantity_books = forms.IntegerField(label='Количество экземпляров')
+
     class Meta:
         model = Book
         fields = '__all__'
         localized_fields = ('date_reg',)
         widgets = {
             'title_rus': TextInput(attrs={}),
+
         }
 
 

@@ -1,11 +1,17 @@
 {% extends 'base.html' %}
 {% block content %}
 <h2>Акт выдачи книг</h2>
-<div style="text-align: center">
+<div class="new-reader">
     {{ name }}<br>
     {% for book in order.book_instance.all %}
-        {{ book.book.title_rus }}<br>
+        {{ book.book.title_rus }} - {{ book.cost_with_coefficient }}<br>
     {% endfor %}
+    Обшая стоимость аренды за {{ order.rental_days }} дней = {{ order.sum_cost }} бел.руб.
+    <form action="" method="POST">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button>Ok</button>
+    </form>
 </div>
 
 {% endblock %}

@@ -1,3 +1,4 @@
+from django.db.models import Prefetch
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.views.generic import ListView, DetailView
@@ -6,6 +7,7 @@ from .forms import ReaderForm, BookForm, AuthorForm, GenreForm, OrderForm
 from .models import Book, Reader, Order, BookInstance
 from .utils import save_reader_id
 from django.contrib import messages
+
 
 # class SearchBookView(ListView):
 #     template_name = 'list_books.html'
@@ -38,7 +40,12 @@ def get_new_book(request):
     if request.method == 'POST':
         form = BookForm(request.POST)
         if form.is_valid():
+            print(form.cleaned_data)
             form.save()
+            print(form.instance)
+            for i in range(form.cleaned_data.get('quantity_books')):
+                BookInstance.objects.create(book=form.instance)
+
             form = BookForm()
     else:
         form = BookForm()
@@ -105,6 +112,7 @@ def get_reader(request, id):
     save_reader_id['name'] = f'{reader.surname} {reader.first_name}'
     return render(request, 'reader.html', context)
 
+
 class BooksListView(ListView):
     model = Book
     template_name = 'list_books.html'
@@ -138,11 +146,9 @@ class ReadersListView(ListView):
 
 
 def list_books_with_id(request):
-    # дополнить
-    if save_reader_id['cdi'] == 0:
-        books = Book.objects.all()
-    else:
-        books = Book.objects.all()
+
+    books = Book.objects.prefetch_related('genres', 'bookinstance_set').prefetch_related(
+        Prefetch('bookinstance_set'))
     context = {'books': books}
     return render(request, 'list_books.html', context=context)
 
@@ -168,28 +174,39 @@ def get_list_book_instance(request, id):
 
 
 def get_add_to_order(request, id):
-    book_instance_got = BookInstance.objects.get(id=id)
-    order, created = Order.objects.get_or_create(reader=Reader.objects.get(id=save_reader_id['cdi']), order_status='active')
-    bi_in_order = order.book_instance.all()
-    if bi_in_order.count() == 5:
-        print('В заказе уже 5 книг!')
-        messages.add_message(request, messages.INFO, "В заказе уже 5 книг!")
-        return redirect('list_books_with_id')
-    for b in bi_in_order:
-        if b.book_id == book_instance_got.book_id:
-            print('Другой экземпляр данной книги уже добавлен в заказ.')
-            messages.add_message(request, messages.INFO, "Другой экземпляр данной книги уже добавлен в заказ")
+    if save_reader_id['cdi'] != 0:
+        book_instance_got = BookInstance.objects.get(id=id)
+        order, created = Order.objects.get_or_create(reader=Reader.objects.get(id=save_reader_id['cdi']),
+                                                     order_status='active')
+        # bi_in_order = order.book_instance.all()
+        if order.book_instance.count() == 5:
+            # print('В заказе уже 5 книг!')
+            messages.add_message(request, messages.INFO, "В заказе уже 5 книг!")
             return redirect('list_books_with_id')
-    order.book_instance.add(book_instance_got)
-    book_instance_got.status = 'r'
-    book_instance_got.save()
-    order.save()
+        for b in order.book_instance.all():
+            if b.book_id == book_instance_got.book_id:
+                # print('Другой экземпляр данной книги уже добавлен в заказ.')
+                messages.add_message(request, messages.INFO, "Другой экземпляр данной книги уже добавлен в заказ")
+                return redirect('list_books_with_id')
+        order.book_instance.add(book_instance_got)
+        book_instance_got.status = 'c'
+        book_instance_got.save()
+        order.save()
     return redirect('list_books_with_id')
 
+
 def get_check_order(request):
+    # проверям, выбран ли читатель, иначе редирект на главную
     if save_reader_id['cdi'] != 0:
-        order = Order.objects.get(reader=Reader.objects.get(id=save_reader_id['cdi']))
-        context = {'order': order}
+        order, created = Order.objects.get_or_create(reader=Reader.objects.get(id=save_reader_id['cdi']))
+        if request.method == 'POST':
+            form = OrderForm(request.POST, instance=order)
+            if form.is_valid():
+                form.save()
+                form = OrderForm(instance=order)
+        else:
+            form = OrderForm(instance=order)
+        context = {'order': order, 'form': form}
         return render(request, 'check_order.html', context)
     else:
         return redirect('main_page')
