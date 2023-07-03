@@ -6,7 +6,9 @@
     {% for book in order.book_instance.all %}
         {{ book.book.title_rus }} - {{ book.cost_with_coefficient }}<br>
     {% endfor %}
-    Обшая стоимость аренды за {{ order.rental_days }} дней = {{ order.sum_cost }} бел.руб.
+
+    Обшая стоимость аренды = {{ order.sum_cost }} бел.руб.
+
     <form action="" method="POST">
         {% csrf_token %}
         {{ form.as_p }}

@@ -20,10 +20,10 @@
                 <li><a class="text-nav" href="{% url 'books_list_page' %}">Список книг</a></li>
                 <li><a class="text-nav" href="{% url 'readers_list_page' %}">Список читателей</a></li>
                 <li><a class="text-nav" href="">Списание книг</a></li>
-                <li><a class="text-nav" href="">Доходность библиотеки</a></li>
+                <li><a class="text-nav" href="">Доходность</a></li>
                 <li><a class="text-nav" href="{% url 'admin:index' %}">Админ</a></li>
                 {% if cdi != 0 %}
-                    <li><a class="text-nav" style="color: red" href="{% url 'check_order' %}">{{ name }}</a><a href="{% url 'clean_cp' %}"><span class="add-274e"></span></a></li>
+                    <li><a class="text-nav" style="color: red; white-space: nowrap" href="{% url 'check_order' %}">{{ name }}</a><a href="{% url 'clean_cp' %}"><span class="add-274e"></span></a></li>
                 {% endif %}
             </ul>
         </div>

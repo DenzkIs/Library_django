@@ -107,6 +107,7 @@ class Order(models.Model):
     def rental_days(self):
         return round((self.return_date - self.order_time).total_seconds() / 60 / 60 / 24)
 
+
     @property
     def sum_cost(self):
         total = 0
