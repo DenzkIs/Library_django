@@ -95,16 +95,20 @@ class Order(models.Model):
     )
     reader = models.ForeignKey('Reader', on_delete=models.CASCADE, verbose_name='Читатель', null=True)
     book_instance = models.ManyToManyField('BookInstance', verbose_name='Экземпляр книги', null=True)
-    order_time = models.DateTimeField(default=timezone.now, verbose_name='Время заказа')
-    return_date = models.DateTimeField(verbose_name='Дата возврата',
-                                       default=datetime.datetime.now() + datetime.timedelta(days=30))
+    order_time = models.DateField(default=datetime.date.today(), verbose_name='Дата заказа')
+    return_date = models.DateField(verbose_name='Дата возврата',
+                                       default=datetime.date.today() + datetime.timedelta(days=30))
     order_status = models.CharField(max_length=8, default='active', choices=STATUS_CHOICES,
                                     verbose_name='Статус заказа')
     penalty_for_delay = models.DecimalField(max_digits=6, decimal_places=2, default=0, verbose_name='Пеня за задержку')
     damage_penalty = models.DecimalField(max_digits=6, decimal_places=2, default=0, verbose_name='Штраф за повреждения')
+    finish_cost = models.DecimalField(max_digits=6, decimal_places=2, default=0,
+                                      verbose_name='Итоговая стоимость заказа')
 
     @property
     def rental_days(self):
+        print(self.return_date, 'дата возврата')
+        print(self.order_time, 'дата заказа')
         return round((self.return_date - self.order_time).total_seconds() / 60 / 60 / 24)
 
 

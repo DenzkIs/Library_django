@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% block content %}
-<h2>Акт выдачи книг</h2>
+<h2>Акт возврата книг</h2>
 <div class="new-reader">
     {{ name }}<br>
 {% if order.book_instance.count != 0 %}
@@ -29,7 +29,7 @@
         <button>Ok</button>
     </form>
 {% else %}
-    Пока в заказе нет книг <br>
+    Все вернул, ничего не должен<br>
 {% endif %}
 </div>
 

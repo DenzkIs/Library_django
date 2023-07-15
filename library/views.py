@@ -1,9 +1,11 @@
+import datetime
+
 from django.db.models import Prefetch
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.views.generic import ListView, DetailView
 from django.views import View
-from .forms import ReaderForm, BookForm, AuthorForm, GenreForm, OrderForm
+from .forms import ReaderForm, BookForm, AuthorForm, GenreForm, OrderForm, ReturnOrderForm
 from .models import Book, Reader, Order, BookInstance
 from .utils import save_reader_id
 from django.contrib import messages
@@ -146,11 +148,12 @@ class ReadersListView(ListView):
 
 
 def list_books_with_id(request):
-
-    books = Book.objects.prefetch_related('genres', 'bookinstance_set').prefetch_related(
-        Prefetch('bookinstance_set'))
-    context = {'books': books}
-    return render(request, 'list_books.html', context=context)
+    book_name = request.GET.get('book_name')
+    if book_name == '' or book_name is None:
+        books = Book.objects.prefetch_related('genres', 'bookinstance_set').order_by('title_rus')
+    else:
+        books = Book.objects.filter(title_rus__icontains=book_name)
+    return render(request, 'list_books.html', context={'books': books})
 
 
 def clean_cp(request):
@@ -195,13 +198,18 @@ def get_add_to_order(request, id):
     return redirect('list_books_with_id')
 
 
-def get_check_order(request):
+def check_order(request):
     # проверям, выбран ли читатель, иначе редирект на главную
     if save_reader_id['cdi'] != 0:
-        order, created = Order.objects.get_or_create(reader=Reader.objects.get(id=save_reader_id['cdi']))
+        order, created = Order.objects.get_or_create(reader=Reader.objects.get(id=save_reader_id['cdi']),
+                                                     order_status='active')
         if request.method == 'POST':
             form = OrderForm(request.POST, instance=order)
             if form.is_valid():
+                # сохраняю заказ, переводя статус экземпляров книг в "r - В аренде"
+                for book in order.book_instance.all():
+                    book.status = 'r'
+                    book.save()
                 form.save()
                 form = OrderForm(instance=order)
         else:
@@ -210,3 +218,43 @@ def get_check_order(request):
         return render(request, 'check_order.html', context)
     else:
         return redirect('main_page')
+
+
+def delete_from_order(request, id):
+    if save_reader_id['cdi'] != 0:
+        order = Order.objects.get(reader=Reader.objects.get(id=save_reader_id['cdi']), order_status='active')
+        book_instance_got = BookInstance.objects.get(id=id)
+        order.book_instance.remove(book_instance_got)
+        book_instance_got.status = 'f'
+        book_instance_got.save()
+        order.save()
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+
+
+def return_order(request):
+    # проверям, выбран ли читатель, иначе редирект на главную
+    if save_reader_id['cdi'] != 0:
+        order = Order.objects.get(reader=Reader.objects.get(id=save_reader_id['cdi']), order_status='active')
+        order.return_date = datetime.date.today()
+        # if order.return_date - order.order_time > 30:
+        print(order.return_date - order.order_time < datetime.timedelta(days=30))
+        order.save()
+        if request.method == 'POST':
+            form = ReturnOrderForm(request.POST, instance=order)
+            if form.is_valid():
+                # сохраняю заказ, переводя статус экземпляров книг в "f - Свободна"
+                for book in order.book_instance.all():
+                    book.status = 'f'
+                    order.book_instance.remove(book)
+                    book.save()
+                form.save()
+                order.order_status = 'finished'
+                order.save()
+                return redirect('main_page')
+        else:
+            form = ReturnOrderForm(instance=order)
+        context = {'order': order, 'form': form}
+        return render(request, 'return_order.html', context)
+    else:
+        return redirect('main_page')
+

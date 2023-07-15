@@ -38,4 +38,10 @@ class AuthorForm(forms.ModelForm):
 class OrderForm(forms.ModelForm):
     class Meta:
         model = Order
+        fields = ['order_time', 'return_date']
+
+
+class ReturnOrderForm(forms.ModelForm):
+    class Meta:
+        model = Order
         fields = '__all__'
