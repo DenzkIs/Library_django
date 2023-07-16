@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>История заказов {{ name }}</h2>
+<table class="table-books">
+	<tbody>
+		<tr>
+            <th>Заказ</th>
+		</tr>
+		{% for order in orders %}
+			<tr class="select-tr">
+				<td><a href=""><div>{{ order }}</div></a></td>
+			</tr>
+		{% endfor %}
+	</tbody>
+</table>
+{% endblock %}

@@ -22,6 +22,7 @@ urlpatterns = [
     path('books_list/<int:id>/', get_list_book_instance, name='get_list_book_instance'),
     path('add_to_order/book_instance/<int:id>/', get_add_to_order, name='get_add_to_order'),
     path('delete_from_order/<int:id>/', delete_from_order, name='delete_from_order'),
+    path('orders_history/', orders_history, name='orders_history'),
 
     # path('reader/<int:pk>/', ReaderDetailView.as_view(), name='reader_detail'),
 

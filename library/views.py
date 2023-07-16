@@ -9,6 +9,7 @@ from .forms import ReaderForm, BookForm, AuthorForm, GenreForm, OrderForm, Retur
 from .models import Book, Reader, Order, BookInstance
 from .utils import save_reader_id
 from django.contrib import messages
+from django.core.exceptions import ObjectDoesNotExist
 
 
 # class SearchBookView(ListView):
@@ -32,6 +33,8 @@ def get_new_reader(request):
         form = ReaderForm(request.POST)
         if form.is_valid():
             form.save()
+            print(form.instance)
+            Order.objects.create(reader=form.instance)
             form = ReaderForm()
     else:
         form = ReaderForm()
@@ -109,13 +112,18 @@ def get_return_book(request):
 
 def get_reader(request, id):
     reader = Reader.objects.get(id=id)
-    context = {'reader': reader}
+
     save_reader_id['cdi'] = id
     save_reader_id['name'] = f'{reader.surname} {reader.first_name}'
+    try:
+        order = Order.objects.get(reader=reader, order_status='active')
+    except ObjectDoesNotExist:
+        order = None
+    context = {'reader': reader, 'order': order}
     return render(request, 'reader.html', context)
 
 
-class BooksListView(ListView):
+class BooksListView(ListView):  # уже лне используется
     model = Book
     template_name = 'list_books.html'
     context_object_name = 'books'
@@ -148,6 +156,13 @@ class ReadersListView(ListView):
 
 
 def list_books_with_id(request):
+    # # удаление заказов и особождение экземпляров книг (нужно перед изменением модели заказа)
+    # for o in Order.objects.all():
+    #     o.delete()
+    # for bi in BookInstance.objects.all():
+    #     bi.status = 'f'
+    #     bi.save()
+
     book_name = request.GET.get('book_name')
     if book_name == '' or book_name is None:
         books = Book.objects.prefetch_related('genres', 'bookinstance_set').order_by('title_rus')
@@ -178,9 +193,11 @@ def get_list_book_instance(request, id):
 
 def get_add_to_order(request, id):
     if save_reader_id['cdi'] != 0:
+        if Order.objects.filter(reader=Reader.objects.get(id=save_reader_id['cdi']), order_status='active').exists():
+            return redirect('orders_history')
         book_instance_got = BookInstance.objects.get(id=id)
         order, created = Order.objects.get_or_create(reader=Reader.objects.get(id=save_reader_id['cdi']),
-                                                     order_status='active')
+                                                     order_status='fills_up')
         # bi_in_order = order.book_instance.all()
         if order.book_instance.count() == 5:
             # print('В заказе уже 5 книг!')
@@ -201,8 +218,9 @@ def get_add_to_order(request, id):
 def check_order(request):
     # проверям, выбран ли читатель, иначе редирект на главную
     if save_reader_id['cdi'] != 0:
-        order, created = Order.objects.get_or_create(reader=Reader.objects.get(id=save_reader_id['cdi']),
-                                                     order_status='active')
+        if Order.objects.filter(reader=Reader.objects.get(id=save_reader_id['cdi']), order_status='active').exists():
+            return redirect('orders_history')
+        order, created = Order.objects.get_or_create(reader=Reader.objects.get(id=save_reader_id['cdi']), order_status='fills_up')
         if request.method == 'POST':
             form = OrderForm(request.POST, instance=order)
             if form.is_valid():
@@ -210,6 +228,8 @@ def check_order(request):
                 for book in order.book_instance.all():
                     book.status = 'r'
                     book.save()
+                order.order_status = 'active'
+                order.save()
                 form.save()
                 form = OrderForm(instance=order)
         else:
@@ -222,7 +242,7 @@ def check_order(request):
 
 def delete_from_order(request, id):
     if save_reader_id['cdi'] != 0:
-        order = Order.objects.get(reader=Reader.objects.get(id=save_reader_id['cdi']), order_status='active')
+        order = Order.objects.get(reader=Reader.objects.get(id=save_reader_id['cdi']), order_status='fills_up')
         book_instance_got = BookInstance.objects.get(id=id)
         order.book_instance.remove(book_instance_got)
         book_instance_got.status = 'f'
@@ -234,11 +254,18 @@ def delete_from_order(request, id):
 def return_order(request):
     # проверям, выбран ли читатель, иначе редирект на главную
     if save_reader_id['cdi'] != 0:
-        order = Order.objects.get(reader=Reader.objects.get(id=save_reader_id['cdi']), order_status='active')
-        order.return_date = datetime.date.today()
-        # if order.return_date - order.order_time > 30:
-        print(order.return_date - order.order_time < datetime.timedelta(days=30))
-        order.save()
+        order, created = Order.objects.get_or_create(reader=Reader.objects.get(id=save_reader_id['cdi']),
+                                                     order_status='active')
+        # если перешел по ссылке возврата товара, когда нет заказа, создается пустой заказ,
+        # иначе пересчитываем время возврата заказа
+        if not created:
+            if datetime.date.today() - order.order_time == datetime.timedelta(days=0):
+                order.return_date = datetime.date.today() + datetime.timedelta(days=1)
+            else:
+                order.return_date = datetime.date.today()
+            print(order.return_date - order.order_time < datetime.timedelta(days=30))
+            order.save()
+        print(order.order_status)
         if request.method == 'POST':
             form = ReturnOrderForm(request.POST, instance=order)
             if form.is_valid():
@@ -258,3 +285,11 @@ def return_order(request):
     else:
         return redirect('main_page')
 
+
+def orders_history(request):
+    if save_reader_id['cdi'] != 0:
+        orders = Order.objects.filter(reader=Reader.objects.get(id=save_reader_id['cdi']))
+        context = {'orders': orders}
+        return render(request, 'orders_history.html', context)
+    else:
+        return redirect('main_page')

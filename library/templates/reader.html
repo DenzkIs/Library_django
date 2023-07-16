@@ -1,51 +1,53 @@
 {% extends 'base.html' %}
 {% block content %}
-<h2>Информация о читателе</h2>
+	<h2>Информация о читателе</h2>
 
-<div class="reader-detail">
-	<div>
-		<table class="table-reader">
-			<tbody>
-				<tr>
-					<td>Фамилия</td>
-					<td>{{ reader.surname }}</td>
-				</tr>
-				<tr>
-					<td>Имя</td>
-					<td>{{ reader.first_name }}</td>
-				</tr>
-				<tr>
-					<td>Отчество</td>
-					<td>{{ reader.patronymic }}</td>
-				</tr>
-				<tr>
-					<td>Номер паспорта</td>
-					<td>
-						{% if reader.passport_number != None %}
-							{{ reader.passport_number }}
-						{% endif %}
-					</td>
-				</tr>
-				<tr>
-					<td>Дата рождения</td>
-					<td>{{ reader.birthday }}</td>
-				</tr>
-				<tr>
-					<td>Email</td>
-					<td>{{ reader.email }}</td>
-				</tr>
-				<tr>
-					<td>Адрес</td>
-					<td>{{ reader.address }}</td>
-				</tr>
-			</tbody>
-		</table>
+	<div class="reader-detail">
+		<div>
+			<table class="table-reader">
+				<tbody>
+					<tr>
+						<td>Фамилия</td>
+						<td>{{ reader.surname }}</td>
+					</tr>
+					<tr>
+						<td>Имя</td>
+						<td>{{ reader.first_name }}</td>
+					</tr>
+					<tr>
+						<td>Отчество</td>
+						<td>{{ reader.patronymic }}</td>
+					</tr>
+					<tr>
+						<td>Номер паспорта</td>
+						<td>
+							{% if reader.passport_number != None %}
+								{{ reader.passport_number }}
+							{% endif %}
+						</td>
+					</tr>
+					<tr>
+						<td>Дата рождения</td>
+						<td>{{ reader.birthday }}</td>
+					</tr>
+					<tr>
+						<td>Email</td>
+						<td>{{ reader.email }}</td>
+					</tr>
+					<tr>
+						<td>Адрес</td>
+						<td>{{ reader.address }}</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+		<div style="border: 1px solid black">
+			<div>Редактировать информацию о читателе</div>
+			<div><a href="{% url 'list_books_with_id' %}">Выбрать книги для заказа</a></div>
+			{% if order %}
+				<div><a href="{% url 'return_order' %}">Оформить акт возврата</a></div>
+			{% endif %}
+			<div><a href="{% url 'orders_history' %}">История заказов</a></div>
+		</div>
 	</div>
-	<div style="border: 1px solid black">
-		<div>Редактировать информацию о читателе</div>
-		<div><a href="{% url 'books_list_page' %}">Оформить новой заказ (вариант 2)</a></div>
-		<div><a href="{% url 'list_books_with_id' %}">Оформить новой заказ (вариант 3)</a></div>
-		<div><a href="{% url 'return_order' %}">Оформить акт возврата</a></div>
-	</div>
-</div>
-{% endblock %}
+{% endblock content %}
