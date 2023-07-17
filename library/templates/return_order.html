@@ -9,13 +9,12 @@
             <tr>
                 <th>Название книги</th>
                 <th>Стоимость аренды в день</th>
-                <th></th>
+
             </tr>
             {% for book in order.book_instance.all %}
             <tr class="select-tr">
                 <td>{{ book.book.title_rus }}</td>
                 <td>{{ book.cost_with_coefficient }}</td>
-                <td><a href="{% url 'delete_from_order' book.id %}">Убрать</a></td>
             </tr>
             {% endfor %}
         </tbody>

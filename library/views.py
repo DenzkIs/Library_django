@@ -194,6 +194,7 @@ def get_list_book_instance(request, id):
 def get_add_to_order(request, id):
     if save_reader_id['cdi'] != 0:
         if Order.objects.filter(reader=Reader.objects.get(id=save_reader_id['cdi']), order_status='active').exists():
+            messages.add_message(request, messages.INFO, "Нельзя, сначала надо вернуть книги!")
             return redirect('orders_history')
         book_instance_got = BookInstance.objects.get(id=id)
         order, created = Order.objects.get_or_create(reader=Reader.objects.get(id=save_reader_id['cdi']),
@@ -219,6 +220,7 @@ def check_order(request):
     # проверям, выбран ли читатель, иначе редирект на главную
     if save_reader_id['cdi'] != 0:
         if Order.objects.filter(reader=Reader.objects.get(id=save_reader_id['cdi']), order_status='active').exists():
+
             return redirect('orders_history')
         order, created = Order.objects.get_or_create(reader=Reader.objects.get(id=save_reader_id['cdi']), order_status='fills_up')
         if request.method == 'POST':
@@ -232,6 +234,8 @@ def check_order(request):
                 order.save()
                 form.save()
                 form = OrderForm(instance=order)
+                messages.add_message(request, messages.INFO, "Заказ создан")
+                return redirect('orders_history')
         else:
             form = OrderForm(instance=order)
         context = {'order': order, 'form': form}
@@ -277,7 +281,9 @@ def return_order(request):
                 form.save()
                 order.order_status = 'finished'
                 order.save()
-                return redirect('main_page')
+                messages.add_message(request, messages.INFO, "Заказ завершен.")
+
+                return redirect('orders_history')
         else:
             form = ReturnOrderForm(instance=order)
         context = {'order': order, 'form': form}
@@ -288,7 +294,7 @@ def return_order(request):
 
 def orders_history(request):
     if save_reader_id['cdi'] != 0:
-        orders = Order.objects.filter(reader=Reader.objects.get(id=save_reader_id['cdi']))
+        orders = Order.objects.filter(reader=Reader.objects.get(id=save_reader_id['cdi'])).order_by('-id').select_related('reader')
         context = {'orders': orders}
         return render(request, 'orders_history.html', context)
     else:
