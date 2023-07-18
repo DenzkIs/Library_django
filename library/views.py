@@ -165,7 +165,7 @@ def list_books_with_id(request):
 
     book_name = request.GET.get('book_name')
     if book_name == '' or book_name is None:
-        books = Book.objects.prefetch_related('genres', 'bookinstance_set').order_by('title_rus')
+        books = Book.objects.prefetch_related('genres').prefetch_related('bookinstance_set').order_by('title_rus')
     else:
         books = Book.objects.filter(title_rus__icontains=book_name)
     return render(request, 'list_books.html', context={'books': books})
@@ -219,10 +219,11 @@ def get_add_to_order(request, id):
 def check_order(request):
     # проверям, выбран ли читатель, иначе редирект на главную
     if save_reader_id['cdi'] != 0:
-        if Order.objects.filter(reader=Reader.objects.get(id=save_reader_id['cdi']), order_status='active').exists():
+        reader = Reader.objects.get(id=save_reader_id['cdi'])
+        if Order.objects.select_related('reader').filter(reader=reader, order_status='active').exists():
 
             return redirect('orders_history')
-        order, created = Order.objects.get_or_create(reader=Reader.objects.get(id=save_reader_id['cdi']), order_status='fills_up')
+        order, created = Order.objects.prefetch_related('book_instance', 'reader').get_or_create(reader=reader, order_status='fills_up')
         if request.method == 'POST':
             form = OrderForm(request.POST, instance=order)
             if form.is_valid():
@@ -233,7 +234,7 @@ def check_order(request):
                 order.order_status = 'active'
                 order.save()
                 form.save()
-                form = OrderForm(instance=order)
+                # form = OrderForm(instance=order)
                 messages.add_message(request, messages.INFO, "Заказ создан")
                 return redirect('orders_history')
         else:

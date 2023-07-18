@@ -37,7 +37,12 @@ class Book(models.Model):
 
     @property
     def quantity_free(self):
-        return self.bookinstance_set.filter(status='f').count()
+        total_free = 0
+        for b in self.bookinstance_set.all():
+            if b.status == 'f':
+                total_free += 1
+        return total_free
+        # return self.bookinstance_set.filter(status='f').count()
 
     @property
     def total_quantity(self):
