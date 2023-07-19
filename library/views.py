@@ -223,7 +223,9 @@ def check_order(request):
         if Order.objects.select_related('reader').filter(reader=reader, order_status='active').exists():
 
             return redirect('orders_history')
-        order, created = Order.objects.prefetch_related('book_instance', 'reader').get_or_create(reader=reader, order_status='fills_up')
+        order, created = Order.objects.prefetch_related('book_instance__book', 'reader').get_or_create(reader=reader, order_status='fills_up')
+        order.order_time = datetime.date.today()
+        order.return_date = order.order_time + datetime.timedelta(days=30)
         if request.method == 'POST':
             form = OrderForm(request.POST, instance=order)
             if form.is_valid():
@@ -232,6 +234,10 @@ def check_order(request):
                     book.status = 'r'
                     book.save()
                 order.order_status = 'active'
+                order.finish_cost = order.sum_cost
+                print(order.rental_days)
+                print(order.sum_cost)
+                print(order.finish_cost)
                 order.save()
                 form.save()
                 # form = OrderForm(instance=order)
@@ -264,13 +270,15 @@ def return_order(request):
         # если перешел по ссылке возврата товара, когда нет заказа, создается пустой заказ,
         # иначе пересчитываем время возврата заказа
         if not created:
-            if datetime.date.today() - order.order_time == datetime.timedelta(days=0):
-                order.return_date = datetime.date.today() + datetime.timedelta(days=1)
-            else:
-                order.return_date = datetime.date.today()
-            print(order.return_date - order.order_time < datetime.timedelta(days=30))
+            one_percent_penalty = order.sum_cost / 100
+            order.return_date = datetime.date.today()
+            order.finish_cost = order.sum_cost
+            if order.rental_days > 30:
+                delay = order.rental_days - 30
+                order.penalty_for_delay = one_percent_penalty * delay
+                order.finish_cost += order.penalty_for_delay
             order.save()
-        print(order.order_status)
+
         if request.method == 'POST':
             form = ReturnOrderForm(request.POST, instance=order)
             if form.is_valid():

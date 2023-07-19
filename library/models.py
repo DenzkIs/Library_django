@@ -113,8 +113,6 @@ class Order(models.Model):
 
     @property
     def rental_days(self):
-        print(self.return_date, 'дата возврата')
-        print(self.order_time, 'дата заказа')
         return round((self.return_date - self.order_time).total_seconds() / 60 / 60 / 24)
 
 

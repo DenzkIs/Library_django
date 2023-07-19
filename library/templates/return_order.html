@@ -19,8 +19,8 @@
             {% endfor %}
         </tbody>
     </table>
-        Стоимость аренды итого: {{ order.sum_cost }} бел.руб. <br>
-        Срок аренды (дней) - {{ order.rental_days }}.
+        Итоговая стоимость аренды (без штрафа): {{ order.sum_cost }} бел.руб. <br>
+        Срок аренды, фактический (дней): {{ order.rental_days }}.
 
     <form action="" method="POST">
         {% csrf_token %}
