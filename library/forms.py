@@ -1,5 +1,7 @@
 from django import forms
+from django.core.exceptions import ValidationError
 from django.forms import Textarea, TextInput
+import re
 
 from .models import Reader, Book, Genre, Author, Order
 
@@ -8,6 +10,13 @@ class ReaderForm(forms.ModelForm):
     class Meta:
         model = Reader
         fields = '__all__'
+
+    def clean_passport_number(self):
+        passport_number = self.cleaned_data.get('passport_number')
+        if not re.fullmatch(r'[A-Za-z]{2}[0-9]{7}', passport_number):
+            raise ValidationError("Не правильный номер паспорта")
+        return passport_number
+
 
 
 class BookForm(forms.ModelForm):
